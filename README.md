@@ -61,5 +61,5 @@ The project demonstrates how SQL can transform raw retail transaction data into 
 
 **Samson Nyakang'o Manono**
 
-GitHub: [manox917](https://github.com/manox917)
+
 
