@@ -1,6 +1,5 @@
----insights
+##insights
 
-/*
  1:Customer Segment Spending
 
 VIP customers have the highest average customer spending at KSh 253,251.88, 
