@@ -1101,7 +1101,7 @@ SELECT
     unit_price,
     discount,
     order_status,
-    quantity * unit_price * (1 - discount / 100.0) AS revenue
+    SUM(quantity * unit_price * (1 - discount / 100.0)) AS revenue
 FROM orders
 WHERE order_status = 'Completed';
 
@@ -1132,7 +1132,6 @@ SELECT MAX(cost_price) AS highest_product_price,--78,500
 	MIN(cost_price) AS lowest_product_price --950
 	FROM orders;
 
-
 --Q16: Calculate revenue by product category.
 SELECT
     product_category,
@@ -1144,9 +1143,9 @@ ORDER BY total_revenue DESC;
 
 SELECT SUM(quantity * unit_price * (1 - COALESCE(discount, 0) / 100.0)) grand_total_revenue
 	FROM orders
-WHERE order_status='Completed';
+WHERE order_status='Completed'; -- grand total was 24,155,371.7
 
--- Mobile Phones was leading with 8,982,283.25 and Accessories was last with 1,542,348.9
+-- Mobile Phones was leading with 6,942,060.65 and Accessories was last with 1,077,496.1
 		
 --Q17: Count customers by city.
 SELECT * FROM customers;
@@ -1162,7 +1161,7 @@ ORDER BY total_customer_per_city DESC ;-- Nairobi leading with 48 customers and 
     SUM(quantity) AS total_quantity_sold
 FROM orders
 GROUP BY product_name
-ORDER BY total_quantity_sold DESC;
+ORDER BY total_quantity_sold DESC; -- this was for the entire data without filter.
 
 --Where the order_status is complete
 SELECT
@@ -1174,20 +1173,19 @@ GROUP BY product_name
 ORDER BY total_quantity_sold DESC;--Mika Blender has 130 and samsung 55in Smart TV has 24.
 
 --Q19: Find categories generating more than KSh 100,000 in revenue.
-SELECT * FROM orders;
 SELECT product_category,
 		SUM(quantity*unit_price*(1 - COALESCE(discount, 0) / 100.0)) AS total_revenue
 	FROM orders 
 	  WHERE order_status='Completed'
 	GROUP BY product_category 
 	HAVING SUM(quantity*unit_price*(1 - COALESCE(discount, 0) / 100.0)) > 100000
-	ORDER BY total_revenue DESC; -- WE Have mobile Phones with 6.9 and accessories with 1.077 million.
-
+	ORDER BY total_revenue DESC;
+-- WE Have mobile Phones with 6.9 and accessories with 1.077 million.
 	
 --Q20: Calculate the percentage of cancelled orders.
 	SELECT count(*) FILTER(WHERE order_status='Cancelled')*100 --counts only cancelled orders.
-	/ count(*) AS percentage_of_cancelled_orders
-		FROM orders; --11%
+			/ count(*) AS percentage_of_cancelled_orders
+		FROM orders; --11% of cancelled orders.
 		
 		-- Section C — Joins and customer analytics (Q21–Q28)
 --Q21:Display orders with customer names and cities.
@@ -1208,7 +1206,7 @@ SELECT  c.customer_id,
 		  WHERE o.order_status='Completed'
 GROUP BY c.customer_id,
 		c.customer_name
-ORDER BY total_spending DESC ;-- Brian Chebet has highest with 1,145,917.05 and lowest is Alex Korir 1,899  
+ORDER BY total_spending DESC ;-- Brian Chebet has highest with 848,118.75 and lowest is Alex Korir 1,899  
 
 --Q23: Identify customers who have never ordered
 SELECT c.customer_name,
@@ -1229,7 +1227,7 @@ SELECT c.customer_name,
 GROUP BY c.customer_id,
 		c.customer_name
 ORDER BY total_spending DESC 
-LIMIT 10; --Brian Chebet has highest with 1,145,917.05 and 10TH is Lucy Otieno 760,067.8
+LIMIT 10; --Brian Chebet has highest with 848,118.75 and 10TH is Anne Achieng with 664,081.5
 
 --Q25: Calculate revenue by customer city
 SELECT c.city,
@@ -1239,7 +1237,7 @@ SELECT c.city,
 	ON c.customer_id=o.customer_id
 	WHERE o.order_status='Completed'
 GROUP BY c.city
-ORDER BY total_revenue DESC ;-- Nairobi has the highest with 12,189,217.4 and Machakos with 1,033,066.8
+ORDER BY total_revenue DESC ;-- Nairobi has the highest with 9,581,980.35 and Machakos with 745,099.9
 
 --Q26: Identify customers with more than five orders.
 SELECT c.customer_name,
@@ -1289,8 +1287,9 @@ JOIN orders AS o
     ON c.customer_id = o.customer_id
 WHERE c.customer_segment = 'VIP'
 GROUP BY o.product_category
-ORDER BY total_units_sold DESC;-- Home Appliances total_units_sold 70.followed with mobile phones 58
-		
+ORDER BY total_units_sold DESC;-- Home Appliances total_units_sold 70. followed with mobile phones 58
+		--computing had the lowest with 28.
+
 --Section D — Subqueries and CTEs (Q29–Q34)
 
 --Q29: Customers spending above the average total spending per purchasing customer
@@ -1312,9 +1311,9 @@ SELECT
     cs.customer_id,
     cs.total_spending
 FROM customer_spending cs
-CROSS JOIN average_spending a
-WHERE cs.total_spending > a.avg_spending
-ORDER BY cs.total_spending DESC;
+CROSS JOIN average_spending as
+WHERE cs.total_spending > as.avg_spending
+ORDER BY cs.total_spending DESC; -- customer_id 33 had the leading with 848,118.75
 
 --Q30: Products priced above the overall average unit price
 SELECT product_name,
@@ -1323,7 +1322,7 @@ SELECT product_name,
 	WHERE unit_price>(
 		SELECT AVG(unit_price) AS avg_unit_price
 		FROM orders)
-	ORDER BY unit_price DESC ;
+	ORDER BY unit_price DESC ;--iPhone 13 unit_price is 89,999
 
 --Q31: Use a CTE to identify the three highest-revenue months.
 
@@ -1370,7 +1369,7 @@ SELECT
     ROUND((revenue - cost) / NULLIF(revenue, 0) * 100,2) AS profit_margin
 FROM category_totals
 ORDER BY profit DESC;
--- the mobile phone generated more revenue compared to the other categories
+-- the mobile phone generated more revenue compared to the other categories and more profit.
 -- and with more revenue generated it means more units of products therefore more cost and a low margin of profit of 10.5.
 -- As for the accessories it had low revenue and low  cost of production but high profit margin of about 42.39
 
@@ -1408,9 +1407,9 @@ SELECT o.customer_id,c.customer_name,
 	WHERE order_status='Completed'
 	GROUP BY o.customer_id,c.customer_name
 	ORDER BY spending_rank desc;--Customers with the same spending receive the same rank, and the next rank is skipped.
+--Brian Chebet had the highest spending ranking of 132 and his total spending was 848,118.75
 
 --Q36: Number each customer's orders by recency using `ROW_NUMBER()
-
 	SELECT customer_id,
 		order_date,
 		row_number()OVER (PARTITION BY customer_id
@@ -1419,7 +1418,7 @@ SELECT o.customer_id,c.customer_name,
 		ORDER BY customer_id,
 		order_date;
 	
-	--Q37: Rank products within categories using DENSE_RANK()
+--Q37: Rank products within categories using DENSE_RANK()
 	SELECT * FROM orders;
 	SELECT product_category,
 			SUM(quantity*unit_price*(1-COALESCE (discount,0)/100.0)) AS revenue,
@@ -1528,23 +1527,23 @@ SELECT
     SUM(quantity * cost_price) AS the_cost,
     SUM(quantity * unit_price * (1 - COALESCE(discount, 0) / 100.0)) - SUM(quantity * cost_price) AS profit 
 FROM orders
+WHERE order_status='Completed'
 GROUP BY TO_CHAR(order_date, 'month'),EXTRACT(MONTH FROM order_date)
 ORDER BY EXTRACT(MONTH FROM order_date);
 
 --Q44: Create a PostgreSQL function that returns completed-order revenue for a supplied customer ID
 CREATE OR REPLACE FUNCTION get_customer_completed_revenue(p_customer_id INT)
-RETURNS NUMERIC AS $$
+RETURNS NUMERIC
+LANGUAGE SQL
+AS $$
     SELECT COALESCE(
-        SUM(quantity * unit_price * (1 - COALESCE(discount, 0) / 100.0)), 
-        0
-    )
+	SUM( quantity * unit_price * (1 - COALESCE(discount, 0) / 100.0)),0)
     FROM orders
     WHERE customer_id = p_customer_id
-      AND order_status = 'completed'; -- Adjust column/value if your completion flag differs
-
-
-SELECT get_customer_completed_revenue(101) AS revenue;
-SELECT get_customer_completed_revenue(999999) AS revenue;
+      AND order_status = 'completed';
+$$;
+SELECT get_customer_completed_revenue(101) AS revenue;--result is 0
+SELECT get_customer_completed_revenue(999998) AS revenue; --result is 0
 
 --Q45: Segment customers into High, Medium and Low Value
 
@@ -1618,7 +1617,6 @@ SELECT
 FROM orders
 GROUP BY TO_CHAR(order_date, 'month'),EXTRACT(MONTH FROM order_date)
 ORDER BY revenue ASC  ;
-
 
 --a report
 WITH customer_sales AS (
