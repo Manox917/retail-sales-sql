@@ -84,8 +84,6 @@ acting as an early warning system for sales slowdowns.
 
 Recommendations
 Investigate Extreme Volatility: Once chronological, look for months with sudden massive spikes or sharp drops.
+Spikes help to determine if they were driven by specific marketing promotions, bulk enterprise orders, 
+or seasonal shopping events (like Black Friday/End-of-Year sales), while dips aid in the check if low revenue months were caused by stockouts, supply chain delays, or a lack of promotional activity.
 
-Spikes: Determine if they were driven by specific marketing promotions, bulk enterprise orders, 
-or seasonal shopping events (like Black Friday/End-of-Year sales).
-Dips: Check if low revenue months were caused by stockouts, supply chain delays, or a lack of promotional activity.
-*/
